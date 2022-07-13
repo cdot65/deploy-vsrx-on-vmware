@@ -1,6 +1,0 @@
----
-all:
-  children:
-    firewalls:
-      hosts:
-        ansible-test:
