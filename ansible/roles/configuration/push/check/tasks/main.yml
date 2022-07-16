@@ -1,0 +1,22 @@
+---
+### ---------------------------------------------------------------------------
+### CHECK THE CONFIGURATION TO MAKE SURE IT IS VALID
+### ---------------------------------------------------------------------------
+- name: "### VALIDATE CANDIDATE CONFIGURATION ON REMOTE DEVICE ###"
+  juniper_junos_config:
+    load: override
+    # user: "{{ provider_info.user }}"
+    # passwd: "{{ provider_info.passwd }}"
+    # ssh_private_key_file: "{{ provider_info.ssh_private_key_file }}"
+    src: "{{ build_completed_file }}"
+    timeout: 240
+    diff: false
+    check: true
+    commit: false
+  register: result
+  # when: is_diff is defined
+
+- name: "### PRINT THE RESULT TO CONSOLE ###"
+  debug:
+    var: result
+  # when: is_diff is defined

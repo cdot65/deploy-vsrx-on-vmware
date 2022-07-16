@@ -1,0 +1,193 @@
+#jinja2: lstrip_blocks: "True (or False)", trim_blocks: "True (or False)"
+{#- ---------------------------------------------------------------------------------- #}
+{# routing-options                                                                     #}
+{# ---------------------------------------------------------------------------------- -#}
+{% if configuration.routing_options is defined %}
+routing-options {
+    {# ----------------------------------------------------------------------------------- #}
+    {# bmp                                                                                 #}
+    {# ----------------------------------------------------------------------------------- #}
+    {% if configuration.routing_options.bmp is defined %}
+    bmp {
+        {% if configuration.routing_options.bmp.station is defined %}
+        {% for each in configuration.routing_options.bmp.station %}
+        station {{ each.name }} {
+            initiation-message {{ inventory_hostname }};
+            local-address {{ each.local_address }};
+            {% if each.local_port is defined %}
+            local-port {{ each.local_port }};
+            {% endif %}
+            connection-mode {{ each.connection_mode }};
+            monitor {{ each.monitor }};
+            {% if each.route_monitoring is defined %}
+            route-monitoring {
+                {% if each.route_monitoring.pre_policy is defined %}
+                pre-policy;
+                {% endif %}
+                {% if each.route_monitoring.post_policy is defined %}
+                post-policy;
+                {% endif %}
+            }
+            {% endif %}
+            station-address {{ each.station_address }};
+            {% if each.routing_instance is defined %}
+            routing-instance {{ each.routing_instance }};
+            {% endif %}
+            station-port {{ each.station_port }};
+            statistics-timeout {{ each.statistics_timeout }};
+        }
+        {% endfor %}
+        {% endif %}
+    }
+    {% endif %}
+    {# ----------------------------------------------------------------------------------- #}
+    {# rib                                                                                 #}
+    {# ----------------------------------------------------------------------------------- #}
+    {% if configuration.routing_options.rib is defined %}
+    rib {{ configuration.routing_options.rib.name }} {
+        {% if configuration.routing_options.rib.static.route is defined %}
+        static {
+            {% if configuration.routing_options.rib.static.route.discard is defined %}
+            route {{ configuration.routing_options.rib.static.route.name }} discard;
+            {% else %}
+            route {{ configuration.routing_options.rib.static.route.name }} {
+                {% if configuration.routing_options.rib.static.route.next_hop is defined %}
+                next-hop {{ configuration.routing_options.rib.static.route.next_hop }};
+                {% endif %}
+                {% if configuration.routing_options.rib.static.route.no_retain is defined %}
+                no-retain;
+                {% endif %}
+                {% if configuration.routing_options.rib.static.route.no_readvertise is defined %}
+                no-readvertise;
+                {% endif %}
+            }
+            {% endif %}
+        }
+        {% endif %}
+    }
+    {% endif %}
+    {# ----------------------------------------------------------------------------------- #}
+    {# interface-routes                                                                    #}
+    {# ----------------------------------------------------------------------------------- #}
+    {% if configuration.routing_options.interface_routes is defined %}
+    {% if configuration.routing_options.interface_routes['@inactive'] is defined %}
+    inactive: interface-routes {
+    {% else %}
+    interface-routes {
+    {% endif %}
+        {% if configuration.routing_options.interface_routes.rib_group is defined %}
+        {% for key, value in configuration.routing_options.interface_routes.rib_group.items() %}
+        rib-group {{ key }} {{ value }};
+        {% endfor %}
+        {% endif %}
+    }
+    {% endif %}
+    {# ----------------------------------------------------------------------------------- #}
+    {# static routes                                                                       #}
+    {# ----------------------------------------------------------------------------------- #}
+    {% if configuration.routing_options.static is defined %}
+    static {
+        {% if configuration.routing_options.static.route is defined %}
+        {% for each in configuration.routing_options.static.route %}
+        {# ----------------------------------------------------------------------------------- #}
+        {# standard static route                                                               #}
+        {# ----------------------------------------------------------------------------------- #}
+        {% if each.no_retain is not defined and each.no_readvertise is not defined %}
+        {% for route in each.next_hop %}
+        route {{ each.name }} next-hop {{ route }};
+        {% endfor %}
+        {# ----------------------------------------------------------------------------------- #}
+        {# if no_readvertise and no_retain is defined in the static route                      #}
+        {# ----------------------------------------------------------------------------------- #}
+        {% else %}
+        route {{ each.name }} {
+            {% for item in each.next_hop %}
+            next-hop {{ item }};
+            {% endfor %}
+            {% if each.no_retain is defined %}
+            no-retain;
+            {% endif %}
+            {% if each.no_readvertise is defined %}
+            no-readvertise;
+            {% endif %}
+        }
+        {% endif %}
+        {% endfor %}
+        {% endif %}
+    }
+    {% endif %}
+    {# ----------------------------------------------------------------------------------- #}
+    {# rib-groups                                                                          #}
+    {# ----------------------------------------------------------------------------------- #}
+    {% if configuration.routing_options.rib_groups is defined %}
+    {% if configuration.routing_options.rib_groups['@inactive'] is defined %}
+    inactive: rib-groups {
+    {% else %}
+    rib-groups {
+    {% endif %}
+        {{ configuration.routing_options.rib_groups.name }} {
+            {% if configuration.routing_options.rib_groups.import_rib is not mapping and configuration.routing_options.rib_groups.import_rib is not string %}
+            import-rib [ {{ configuration.routing_options.rib_groups.import_rib|join(' ') }} ];
+            {% else %}
+            import-rib {{ configuration.routing_options.rib_groups.import_rib }};
+            {% endif %}
+            {% if configuration.routing_options.rib_groups.import_policy is defined %}
+            import-policy {{ configuration.routing_options.rib_groups.import_policy }};
+            {% endif %}
+        }
+    }
+    {% endif %}
+    {# ----------------------------------------------------------------------------------- #}
+    {# router_id                                                                           #}
+    {# ----------------------------------------------------------------------------------- #}
+    {% if configuration.routing_options.router_id is defined %}
+    router-id {{ configuration.routing_options.router_id }};
+    {% endif %}
+    {# ----------------------------------------------------------------------------------- #}
+    {# autonomous-system                                                                   #}
+    {# ----------------------------------------------------------------------------------- #}
+    {% if configuration.routing_options.autonomous_system is defined %}
+    {% if configuration.routing_options.autonomous_system.asdot_notation is defined %}
+    autonomous-system {{ configuration.routing_options.autonomous_system.as_number }} asdot-notation;
+    {% else %}
+    autonomous-system {{ configuration.routing_options.autonomous_system.as_number }};
+    {% endif %}
+    {% endif %}
+    {# ----------------------------------------------------------------------------------- #}
+    {# forwarding-table                                                                    #}
+    {# ----------------------------------------------------------------------------------- #}
+    {% if configuration.routing_options.forwarding_table is defined %}
+    forwarding-table {
+        {% if configuration.routing_options.forwarding_table.export is defined %}
+        {% for each in configuration.routing_options.forwarding_table.export %}
+        export {{ each }};
+        {% endfor %}
+        {% endif %}
+        {% if configuration.routing_options.forwarding_table.ecmp_fast_reroute is defined %}
+        ecmp-fast-reroute;
+        {% endif %}
+    }
+    {# ----------------------------------------------------------------------------------- #}
+    {# rpd-server                                                                          #}
+    {# ----------------------------------------------------------------------------------- #}
+    {% if configuration.routing_options.undocumented is defined %}
+    {% if configuration.routing_options.undocumented.rpd_server is defined %}
+    {% if configuration.routing_options.undocumented.rpd_server['@inactive'] is defined %}
+    inactive: rpd-server {
+    {% else %}
+    rpd-server {
+    {% endif %}
+        {% if configuration.routing_options.undocumented.rpd_server.traceoptions is defined %}
+        traceoptions {
+            file {{ configuration.routing_options.undocumented.rpd_server.traceoptions.file.filename }} size {{ configuration.routing_options.undocumented.rpd_server.traceoptions.file.size }};
+            {% for each in configuration.routing_options.undocumented.rpd_server.traceoptions.flag %}
+            flag {{ each.name }};
+            {% endfor %}
+        }
+        {% endif %}
+    }
+    {% endif %}
+    {% endif %}
+    {% endif %}
+}
+{% endif %}

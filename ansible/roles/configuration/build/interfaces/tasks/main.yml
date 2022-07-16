@@ -1,0 +1,5 @@
+---
+- name: building interfaces configuration
+  template:
+    src: "interfaces.j2"
+    dest: "tmp/{{ vm_name }}/07_interfaces.part.conf"

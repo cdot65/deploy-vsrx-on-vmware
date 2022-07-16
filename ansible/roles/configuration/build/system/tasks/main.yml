@@ -1,0 +1,5 @@
+---
+- name: building system configuration
+  template:
+    src: "system.j2"
+    dest: "tmp/{{ vm_name }}/01_system.part.conf"

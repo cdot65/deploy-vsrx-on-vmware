@@ -1,4 +1,4 @@
-ansible==2.10.7
+ansible==6.1.*
 jsnapy
 junos-eznc
 jxmlease

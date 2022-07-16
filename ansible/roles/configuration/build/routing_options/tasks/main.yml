@@ -1,0 +1,5 @@
+---
+- name: building routing_options configuration
+  template:
+    src: "routing_options.j2"
+    dest: "tmp/{{ vm_name }}/10_routing_options.part.conf"

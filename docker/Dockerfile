@@ -35,6 +35,7 @@ RUN ansible-galaxy collection install community.vmware
 COPY docker/ansible.cfg /etc/ansible/ansible.cfg
 COPY ansible/inventory.yaml inventory.yaml
 COPY ansible/deploy.vsrx.yaml deploy.vsrx.yaml
+COPY ansible/test.yaml test.yaml
 
 ### ---------------------------------------------------------------------------
 ### Environmentals

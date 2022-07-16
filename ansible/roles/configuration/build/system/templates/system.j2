@@ -1,0 +1,9 @@
+#jinja2: lstrip_blocks: "True (or False)", trim_blocks: "True (or False)"
+{#- ---------------------------------------------------------------------------------- #}
+{# vSRX hostname                                                                       #}
+{# ---------------------------------------------------------------------------------- -#}
+{% if vm_name is defined %}
+system {
+    host-name {{ vm_name }};
+}
+{% endif %}

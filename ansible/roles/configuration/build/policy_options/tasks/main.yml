@@ -1,0 +1,5 @@
+---
+- name: building policy_options configuration
+  template:
+    src: "policy_options.j2"
+    dest: "tmp/{{ vm_name }}/09_policy_options.part.conf"

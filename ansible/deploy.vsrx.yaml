@@ -9,46 +9,87 @@
     - juniper.device
   tasks:
 
-    - name: "### DEPLOY vSRX ###"
-      community.vmware.vmware_guest:
-        # define connection parameters
-        hostname: "{{ vcenter_hostname }}"
-        username: "{{ vcenter_username }}"
-        password: "{{ vcenter_password }}"
-        validate_certs: False
+   - name: Build our vSRX configuration
+     block:
 
-        # define vCenter parameters
-        datacenter: "{{ datacenter }}"
-        state: present
-        folder: "{{ folder }}"
-        esxi_hostname: "{{ esxi_host }}"
+      - name: Create local directories
+        ansible.builtin.include_role:
+          name: build_directories
 
-        # define VM specifics
-        template: "{{ template }}"
-        name: "{{ vm_name }}"
-        wait_for_ip_address: True
+      - name: Build routed vSRX configuration
+        ansible.builtin.include_role:
+          name: '{{ configuration_role }}'
+        loop:
+          - 'configuration/build/system'
+          - 'configuration/build/interfaces'
+          # - 'configuration/build/system'
+          # - 'configuration/build/system'
+          # - 'configuration/build/system'
+        loop_control:
+          loop_var: configuration_role
 
-      delegate_to: localhost
-      register: vsrx_details
+      - name: Layer 2 mode
+        ansible.builtin.include_role:
+          name: '{{ configuration_role }}'
+        loop:
+          - 'configuration/build/vlans'
+        loop_control:
+          loop_var: configuration_role
+        when: route_or_switch == "switch"
+
+      - name: Layer 3 mode
+        ansible.builtin.include_role:
+          name: '{{ configuration_role }}'
+        loop:
+          - 'configuration/build/protocols'
+        loop_control:
+          loop_var: configuration_role
+        when: route_or_switch == "route"
+
+      - name: Assemble our vSRX parts
+        ansible.builtin.include_role:
+          name: configuration/assemble
+
+  #   - name: "### DEPLOY vSRX ###"
+  #     community.vmware.vmware_guest:
+  #       # define connection parameters
+  #       hostname: "{{ vcenter_hostname }}"
+  #       username: "{{ vcenter_username }}"
+  #       password: "{{ vcenter_password }}"
+  #       validate_certs: False
+
+  #       # define vCenter parameters
+  #       datacenter: "{{ datacenter }}"
+  #       state: present
+  #       folder: "{{ folder }}"
+  #       esxi_hostname: "{{ esxi_host }}"
+
+  #       # define VM specifics
+  #       template: "{{ template }}"
+  #       name: "{{ vm_name }}"
+  #       wait_for_ip_address: True
+
+  #     delegate_to: localhost
+  #     register: vsrx_details
     
-    - name: Print details to screen
-      debug:
-        msg: "{{ vsrx_details }}"
+  #   - name: Print details to screen
+  #     debug:
+  #       msg: "{{ vsrx_details }}"
 
-    - name: "### APPLY CANDIDATE CONFIGURATION ON REMOTE DEVICE ###"
-      juniper.device.config:
-        host: "{{ vsrx_details['instance']['ipv4'] }}"
-        user: "root"
-        passwd: "juniper123"
-        load: 'merge'
-        lines:
-          - "set system host-name {{ vsrx_details['instance']['hw_name'] }}"
-          - "set system name-server 1.1.1.1"
-          - "set system name-server 8.8.8.8"
-        timeout: 240
-      register: result
+  #   - name: "### APPLY CANDIDATE CONFIGURATION ON REMOTE DEVICE ###"
+  #     juniper.device.config:
+  #       host: "{{ vsrx_details['instance']['ipv4'] }}"
+  #       user: "root"
+  #       passwd: "juniper123"
+  #       load: 'merge'
+  #       lines:
+  #         - "set system host-name {{ vsrx_details['instance']['hw_name'] }}"
+  #         - "set system name-server 1.1.1.1"
+  #         - "set system name-server 8.8.8.8"
+  #       timeout: 240
+  #     register: result
 
-    - name: "### PRINT THE RESULT TO CONSOLE ###"
-      debug:
-        var: result.diff_lines
-      when: result.diff_lines is defined
+  #   - name: "### PRINT THE RESULT TO CONSOLE ###"
+  #     debug:
+  #       var: result.diff_lines
+  #     when: result.diff_lines is defined

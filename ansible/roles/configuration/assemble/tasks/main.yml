@@ -1,0 +1,24 @@
+---
+- name: check if directory is present
+  file: 
+    path: "config"
+    state: directory
+  run_once: true
+
+
+- name: "assemble configurations to temp completed folder"
+  assemble: 
+    src: "tmp/{{ vm_name }}/"
+    dest: "tmp/{{ vm_name }}.conf"
+
+- name: Remove blank lines between matches
+  lineinfile:
+    path: "tmp/{{ vm_name }}.conf"
+    regexp: '(^\s*$)'
+    state: absent
+
+- name: "copy completed config file to project's config directory backup purposes"
+  copy: 
+    src: "tmp/{{ vm_name }}.conf"
+    dest: "config/{{ vm_name }}.conf"
+    backup: yes

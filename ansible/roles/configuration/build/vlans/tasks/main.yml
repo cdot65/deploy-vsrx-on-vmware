@@ -1,0 +1,5 @@
+---
+- name: building vlans configuration
+  template:
+    src: "vlans.j2"
+    dest: "tmp/{{ vm_name }}/19_vlans.part.conf"

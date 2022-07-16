@@ -1,0 +1,5 @@
+---
+- name: building protocols configuration
+  template:
+    src: "protocols.j2"
+    dest: "tmp/{{ vm_name }}/11_protocols.part.conf"

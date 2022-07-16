@@ -1,0 +1,5 @@
+---
+- name: building security configuration
+  template:
+    src: "security.j2"
+    dest: "tmp/{{ vm_name }}/06_security.part.conf"

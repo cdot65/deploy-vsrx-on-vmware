@@ -1,0 +1,839 @@
+#jinja2: lstrip_blocks: "True (or False)", trim_blocks: "True (or False)"
+{#- ---------------------------------------------------------------------------------- #}
+{# configuration.security                                                                            #}
+{# ------------------------------------------------------------------------------------#}
+{% if configuration.security is defined %}
+security {
+    {# ----------------------------------------------------------------------------------- #}
+    {# configuration.security.log                                                                 #}
+    {# ----------------------------------------------------------------------------------- #}
+    {% if configuration.security.log is defined %}
+    log {
+        {% if configuration.security.log.mode is defined %}
+        mode {{ configuration.security.log.mode }};
+        {% endif %}
+        {% if configuration.security.log.mode is defined %}
+        format {{ configuration.security.log.format }};
+        {% endif %}
+        {% if configuration.security.log.report is defined %}
+        report;
+        {% endif %}
+        {% if configuration.security.log.source_address is defined %}
+        source-address {{ configuration.security.log.source_address }};
+        {% endif %}
+        {% if configuration.security.log.source_interface is defined %}
+        source-interface {{ configuration.security.log.source_interface }};
+        {% endif %}
+        {% if configuration.security.log.transport is defined %}
+        transport {
+            protocol {{ configuration.security.log.transport.protocol }};
+        }
+        {% endif %}
+        {% if configuration.security.log.stream is defined %}
+        stream {{ configuration.security.log.stream.name }} {
+            severity {{ configuration.security.log.stream.severity }};
+            format {{ configuration.security.log.stream.format }};
+            category {{ configuration.security.log.stream.category }};
+            host {
+                {{ configuration.security.log.stream.host.ipaddr }};
+                {% if configuration.security.log.stream.host.port is defined %}
+                port {{ configuration.security.log.stream.host.port }};
+                {% endif %}
+            }
+        }
+        {% endif %}
+    }
+    {% endif %}
+    {# ----------------------------------------------------------------------------------- #}
+    {# configuration.security.ike                                                                 #}
+    {# ----------------------------------------------------------------------------------- #}
+    {% if configuration.security.ike is defined %}
+    ike {
+        {# ----------------------------------------------------------------------------------- #}
+        {# IKE policies                                                                        #}
+        {# ----------------------------------------------------------------------------------- #}
+        {% if configuration.security.ike.policy is not mapping and configuration.security.ike.policy is not string %}
+        {% for each in configuration.security.ike.policy %}
+        policy {{ each.name }} {
+            {% if each.mode is defined %}
+            mode {{ each.mode }};
+            {% endif %}
+            {% if each.proposal_set is defined %}
+            proposal-set {{ each.proposal_set }};
+            {% endif %}
+            {% if each.pre_shared_key is defined %}
+            pre-shared-key ascii-text "{{ each.pre_shared_key.ascii_text }}";
+            {% endif %}
+        }
+        {% endfor %}
+        {% else %}
+        policy {{ configuration.security.ike.policy.name }} {
+            {% if configuration.security.ike.policy.mode is defined %}
+            mode {{ configuration.security.ike.policy.mode }};
+            {% endif %}
+            {% if configuration.security.ike.policy.proposal_set is defined %}
+            proposal-set {{ configuration.security.ike.policy.proposal_set }};
+            {% endif %}
+            {% if configuration.security.ike.policy.pre_shared_key is defined %}
+            pre-shared-key ascii-text "{{ configuration.security.ike.policy.pre_shared_key.ascii_text }}";
+            {% endif %}
+        }
+        {% endif %}
+        {# ----------------------------------------------------------------------------------- #}
+        {# IKE gateways                                                                        #}
+        {# ----------------------------------------------------------------------------------- #}
+        {% if configuration.security.ike.gateway is not mapping and configuration.security.ike.gateway is not string %}
+        {% for each in configuration.security.ike.gateway %}
+        gateway {{ each.name }} {
+            {% if each.ike_policy is defined %}
+            ike-policy {{ each.ike_policy }};
+            {% endif %}
+            {% if each.address is defined %}
+            address {{ each.address }};
+            {% endif %}
+            {% if each.local_identity is defined %}
+            {% if each.local_identity.user_at_hostname is defined %}
+            local-identity user-at-hostname "{{ each.local_identity.user_at_hostname.identity_user }}";
+            {% endif %}
+            {% endif %}
+            external-interface {{ each.external_interface }};
+        }
+        {% endfor %}
+        {% else %}
+        gateway {{ configuration.security.ike.gateway.name }} {
+            {% if configuration.security.ike.gateway.ike_policy is defined %}
+            ike-policy {{ configuration.security.ike.gateway.ike_policy }};
+            {% endif %}
+            {% if configuration.security.ike.gateway.address is defined %}
+            address {{ configuration.security.ike.gateway.address }};
+            {% endif %}
+            {% if configuration.security.ike.gateway.local_identity is defined %}
+            {% if configuration.security.ike.gateway.local_identity.user_at_hostname is defined %}
+            local-identity user-at-hostname "{{ configuration.security.ike.gateway.local_identity.user_at_hostname.identity_user }}";
+            {% endif %}
+            {% endif %}
+            external-interface {{ configuration.security.ike.gateway.external_interface }};
+        }
+        {% endif %}
+    }
+    {% endif %}
+    {# ----------------------------------------------------------------------------------- #}
+    {# configuration.security.ipsec                                                               #}
+    {# ----------------------------------------------------------------------------------- #}
+    {% if configuration.security.ipsec is defined %}
+    ipsec {
+        {# ----------------------------------------------------------------------------------- #}
+        {# configuration.security.ipsec.proposal                                                      #}
+        {# ----------------------------------------------------------------------------------- #}
+        {% if configuration.security.ipsec.proposal is defined %}
+        {% if configuration.security.ipsec.proposal is not mapping and configuration.security.ipsec.proposal is not string %}
+        {% for each in configuration.security.ipsec.proposal %}
+        proposal {{ each.name }} {
+            {% if each.protocol is defined %}
+            protocol {{ each.protocol }};
+            {% endif %}
+            {% if each.authentication_algorithm is defined %}
+            authentication-algorithm {{ each.authentication_algorithm }};
+            {% endif %}
+            {% if each.encryption_algorithm is defined %}
+            encryption-algorithm {{ each.encryption_algorithm }};
+            {% endif %}
+            {% if each.lifetime_seconds is defined %}
+            lifetime-seconds {{ each.lifetime_seconds }};
+            {% endif %}
+        }
+        {% endfor %}
+        {% else %}
+        proposal {{ configuration.security.ipsec.proposal.name }} {
+            {% if configuration.security.ipsec.proposal.protocol is defined %}
+            protocol {{ configuration.security.ipsec.proposal.protocol }};
+            {% endif %}
+            {% if configuration.security.ipsec.proposal.authentication_algorithm is defined %}
+            authentication-algorithm {{ configuration.security.ipsec.proposal.authentication_algorithm }};
+            {% endif %}
+            {% if configuration.security.ipsec.proposal.encryption_algorithm is defined %}
+            encryption-algorithm {{ configuration.security.ipsec.proposal.encryption_algorithm }};
+            {% endif %}
+            {% if configuration.security.ipsec.proposal.lifetime_seconds is defined %}
+            lifetime-seconds {{ configuration.security.ipsec.proposal.lifetime_seconds }};
+            {% endif %}
+        }
+        {% endif %}
+        {% endif %}
+        {# ----------------------------------------------------------------------------------- #}
+        {# configuration.security.ipsec.policy                                                        #}
+        {# ----------------------------------------------------------------------------------- #}
+        {% if configuration.security.ipsec.policy is defined %}
+        {% if configuration.security.ipsec.policy is not mapping and configuration.security.ipsec.policy is not string %}
+        {% for each in configuration.security.ipsec.policy %}
+        policy {{ each.name }} {
+            {% if each.perfect_forward_secrecy is defined %}
+            perfect-forward-secrecy {
+                keys {{ each.perfect_forward_secrecy['keys'] }};
+            }
+            {% endif %}
+            {% if each.proposals is defined %}
+            proposals {{ each.proposals }};
+            {% endif %}
+            {% if each.proposal_set is defined %}
+            proposal-set {{ each.proposal_set }};
+            {% endif %}
+        }
+        {% endfor %}
+        {% else %}
+        policy {{ configuration.security.ipsec.policy.name }} {
+            {% if configuration.security.ipsec.policy.perfect_forward_secrecy is defined %}
+            perfect-forward-secrecy {
+                keys {{ configuration.security.ipsec.policy.perfect_forward_secrecy.keys }};
+            }
+            {% endif %}
+            {% if configuration.security.ipsec.policy.proposals is defined %}
+            proposals {{ configuration.security.ipsec.policy.proposals }};
+            {% endif %}
+            {% if configuration.security.ipsec.policy.proposal_set is defined %}
+            proposal-set {{ configuration.security.ipsec.policy.proposal_set }};
+            {% endif %}
+        }
+        {% endif %}
+        {% endif %}
+        {# ----------------------------------------------------------------------------------- #}
+        {# configuration.security.ipsec.vpn                                                           #}
+        {# ----------------------------------------------------------------------------------- #}
+        {% if configuration.security.ipsec.vpn is defined %}
+        {% if configuration.security.ipsec.vpn is not mapping and configuration.security.ipsec.vpn is not string %}
+        {% for each in configuration.security.ipsec.vpn %}
+        vpn {{ each.name }} {
+            {% if each.bind_interface is defined %}
+            {% if each.bind_interface['@inactive'] is defined %}
+            inactive: bind-interface {{ each.bind_interface['#text'] }};
+            {% else %}
+            bind-interface {{ each.bind_interface['#text'] }};
+            {% endif %}
+            {% endif %}
+            {% if each.df_bit is defined %}
+            df-bit {{ each.df_bit }};
+            {% endif %}
+            {% if each.ike is defined %}
+            ike {
+                gateway {{ each.ike.gateway }};
+                ipsec-policy {{ each.ike.ipsec_policy }};
+            }
+            {% endif %}
+            {% if each.establish_tunnels is defined %}
+            establish-tunnels {{ each.establish_tunnels }};
+            {% endif %}
+        }
+        {% endfor %}
+        {% else %}
+        vpn {{ configuration.security.ipsec.vpn.name }} {
+            {% if configuration.security.ipsec.vpn.bind_interface is defined %}
+            {% if configuration.security.ipsec.vpn.bind_interface['@inactive'] is defined %}
+            inactive: bind-interface {{ configuration.security.ipsec.vpn.bind_interface['#text'] }};
+            {% else %}
+            bind-interface {{ configuration.security.ipsec.vpn.bind_interface['#text'] }};
+            {% endif %}
+            {% endif %}
+            {% if configuration.security.ipsec.vpn.df_bit is defined %}
+            df-bit {{ configuration.security.ipsec.vpn.df_bit }};
+            {% endif %}
+            {% if configuration.security.ipsec.vpn.ike is defined %}
+            ike {
+                gateway {{ configuration.security.ipsec.vpn.ike.gateway }};
+                ipsec-policy {{ configuration.security.ipsec.vpn.ike.ipsec_policy }};
+            }
+            {% endif %}
+            {% if configuration.security.ipsec.vpn.establish_tunnels is defined %}
+            establish-tunnels {{ configuration.security.ipsec.vpn.establish_tunnels }};
+            {% endif %}
+        }
+        {% endif %}
+        {% endif %}
+    }
+    {% endif %}
+    {# ----------------------------------------------------------------------------------- #}
+    {# configuration.security.address_book                                                        #}
+    {# ----------------------------------------------------------------------------------- #}
+    {% if configuration.security.address_book is defined %}
+    address-book {
+        {% if configuration.security.address_book is defined %}
+        {{ configuration.security.address_book.name }} {
+            {% if configuration.security.address_book.address is defined %}
+            {% if configuration.security.address_book.address is not mapping and configuration.security.address_book.address is not string %}
+            {% for each in configuration.security.address_book.address %}
+            address {{ each.name }} {
+                {% if each.description is defined %}
+                description "{{ each.description }}";
+                {% endif %}
+                {% if each.ip_prefix is defined %}
+                {{ each.ip_prefix }};
+                {% endif %}
+            }
+            {% endfor %}
+            {% else %}
+            address {{ configuration.security.address_book.address.name }} {
+                {% if configuration.security.address_book.address.description is defined %}
+                description "{{ configuration.security.address_book.address.description }}";
+                {% endif %}
+                {% if configuration.security.address_book.address.ip_prefix is defined %}
+                {{ each.ip_prefix }};
+                {% endif %}
+            }
+            {% endif %}
+            {% endif %}
+            {% if configuration.security.address_book.address_set is defined %}
+            {% if configuration.security.address_book.address_set is not mapping and configuration.security.address_book.address_set is not string %}
+            {% for each in configuration.security.address_book.address_set %}
+            address-set {{ each.name }} {
+                {% if each.address is not mapping and each.address is not string %}
+                {% for item in each.address %}
+                address {{ item.name }};
+                {% endfor %}
+                {% else %}
+                address {{ each.address.name }};
+                {% endif %}
+            }
+            {% endfor %}
+            {% else %}
+            address-set {{ configuration.security.address_book.address_set.name }} {
+                {% if configuration.security.address_book.address_set.address is not mapping and configuration.security.address_book.address_set.address is not string %}
+                {% for item in configuration.security.address_book.address_set.address %}
+                address {{ item.name }};
+                {% endfor %}
+                {% else %}
+                address {{ configuration.security.address_book.address_set.address.name }};
+                {% endif %}
+            }
+            {% endif %}
+            {% endif %}
+        }
+        {% endif %}
+    }
+    {% endif %}
+    {# ----------------------------------------------------------------------------------- #}
+    {# configuration.security.application_tracking                                                #}
+    {# ----------------------------------------------------------------------------------- #}
+    {% if configuration.security.application_tracking is defined %}
+    application-tracking {
+        {% if configuration.security.application_tracking.first_update is defined %}
+        first-update;
+        {% endif %}
+        {% if configuration.security.application_tracking.session_update_interval is defined %}
+        session-update-interval {{ configuration.security.application_tracking.session_update_interval }};
+        {% endif %}
+    }
+    {% endif %}
+    {# ----------------------------------------------------------------------------------- #}
+    {# configuration.security.forwarding_options                                                  #}
+    {# ----------------------------------------------------------------------------------- #}
+    {% if configuration.security.forwarding_options is defined %}
+    forwarding-options {
+        {% if configuration.security.forwarding_options.family is defined %}
+        family {
+            {% if configuration.security.forwarding_options.family.inet6 is defined %}
+            inet6 {
+                mode {{ configuration.security.forwarding_options.family.inet6.mode }};
+            }
+            {% endif %}
+        }
+        {% endif %}
+    }
+    {% endif %}
+    {# ----------------------------------------------------------------------------------- #}
+    {# configuration.security.flow                                                                #}
+    {# ----------------------------------------------------------------------------------- #}
+    {% if configuration.security.flow is defined %}
+    flow {
+        {% if configuration.security.flow.traceoptions is defined %}
+        traceoptions {
+            {% if configuration.security.flow.traceoptions.file is defined %}
+            file {{ configuration.security.flow.traceoptions.file.filename }};
+            {% endif %}
+            {% if configuration.security.flow.traceoptions.flag is defined %}
+            flag {{ configuration.security.flow.traceoptions.flag.name }};
+            {% endif %}
+            {% if configuration.security.flow.traceoptions.packet_filter is defined %}
+            packet-filter {{ configuration.security.flow.traceoptions.packet_filter.name }} {
+                source-prefix {{ configuration.security.flow.traceoptions.packet_filter.source_prefix }};
+                destination-prefix {{ configuration.security.flow.traceoptions.packet_filter.destination_prefix }};
+            }
+            {% endif %}
+        }
+        {% endif %}
+    }
+    {% endif %}
+    {# ----------------------------------------------------------------------------------- #}
+    {# configuration.security.screen                                                              #}
+    {# ----------------------------------------------------------------------------------- #}
+    {% if configuration.security.screen is defined %}
+    screen {
+        {% if configuration.security.screen.ids_option is defined %}
+        ids-option {{ configuration.security.screen.ids_option.name }} {
+            {% if configuration.security.screen.ids_option.icmp is defined %}
+            icmp {
+                {% if configuration.security.screen.ids_option.icmp.ping_death is defined %}
+                ping-death;
+                {% endif %}
+            }
+            {% endif %}
+            {% if configuration.security.screen.ids_option.ip is defined %}
+            ip {
+                {% if configuration.security.screen.ids_option.ip.source_route_option is defined %}
+                source-route-option;
+                {% endif %}
+                {% if configuration.security.screen.ids_option.ip.tear_drop is defined %}
+                tear-drop;
+                {% endif %}
+            }
+            {% endif %}
+            {% if configuration.security.screen.ids_option.tcp is defined %}
+            tcp {
+                {% if configuration.security.screen.ids_option.tcp.syn_flood is defined %}
+                syn-flood {
+                    {% if configuration.security.screen.ids_option.tcp.syn_flood.alarm_threshold is defined %}
+                    alarm-threshold {{ configuration.security.screen.ids_option.tcp.syn_flood.alarm_threshold }};
+                    {% endif %}
+                    {% if configuration.security.screen.ids_option.tcp.syn_flood.attack_threshold is defined %}
+                    attack-threshold {{ configuration.security.screen.ids_option.tcp.syn_flood.attack_threshold }};
+                    {% endif %}
+                    {% if configuration.security.screen.ids_option.tcp.syn_flood.source_threshold is defined %}
+                    source-threshold {{ configuration.security.screen.ids_option.tcp.syn_flood.source_threshold }};
+                    {% endif %}
+                    {% if configuration.security.screen.ids_option.tcp.syn_flood.destination_threshold is defined %}
+                    destination-threshold {{ configuration.security.screen.ids_option.tcp.syn_flood.destination_threshold }};
+                    {% endif %}
+                    {% if configuration.security.screen.ids_option.tcp.syn_flood.timeout is defined %}
+                    timeout {{ configuration.security.screen.ids_option.tcp.syn_flood.timeout }};
+                    {% endif %}
+                }
+                {% endif %}
+                {% if configuration.security.screen.ids_option.tcp.land is defined %}
+                land;
+                {% endif %}
+            }
+            {% endif %}
+        }
+        {% endif %}
+    }
+    {% endif %}
+    {# ----------------------------------------------------------------------------------- #}
+    {# configuration.security.nat                                                                 #}
+    {# ----------------------------------------------------------------------------------- #}
+    {% if configuration.security.nat is defined %}
+    nat {
+        {# ----------------------------------------------------------------------------------- #}
+        {# configuration.security.nat.source                                                          #}
+        {# ----------------------------------------------------------------------------------- #}
+        {% if configuration.security.nat.source is defined %}
+        source {
+            {% if configuration.security.nat.source.rule_set is defined %}
+            {% if configuration.security.nat.source.rule_set is not mapping and configuration.security.nat.source.rule_set is not string %}
+            {% for each in configuration.security.nat.source.rule_set %}
+            rule-set {{ each.name }} {
+                {% if each.from is defined %}
+                from zone {{ each.from.zone }};
+                {% endif %}
+                {% if each.to is defined %}
+                to zone {{ each.to.zone }};
+                {% endif %}
+                {% if each.rule is defined %}
+                {% if each.rule is not mapping and each.rule is not string %}
+                {% for rule in each.rule %}
+                rule {{ rule.name }} {
+                    {% if rule.src_nat_rule_match is defined %}
+                    match {
+                        source-address {{ rule.src_nat_rule_match.source_address }};
+                        destination-address {{ rule.src_nat_rule_match.destination_address }};
+                    }
+                    {% endif %}
+                    {% if rule.then is defined %}
+                    then {
+                        {% if rule.then.source_nat is defined %}
+                        source-nat {
+                            {% if rule.then.source_nat.interface is defined %}
+                            interface;
+                            {% else %}
+                            off;
+                            {% endif %}
+                        }
+                        {% endif %}
+                    }
+                    {% endif %}
+                }
+                {% endfor %}
+                {% else %}
+                rule {{ each.rule.name }} {
+                    {% if each.rule.src_nat_rule_match is defined %}
+                    match {
+                        source-address {{ each.rule.src_nat_rule_match.source_address }};
+                        destination-address {{ each.rule.src_nat_rule_match.destination_address }};
+                    }
+                    {% endif %}
+                    {% if each.rule.then is defined %}
+                    then {
+                        {% if each.rule.then.source_nat is defined %}
+                        source-nat {
+                            {% if each.rule.then.source_nat.interface is defined %}
+                            interface;
+                            {% endif %}
+                        }
+                        {% endif %}
+                    }
+                    {% endif %}
+                }
+                {% endif %}
+                {% endif %}
+            }
+            {% endfor %}
+            {% else %}
+            rule-set {{ configuration.security.nat.source.rule_set.name }} {
+                {% if configuration.security.nat.source.rule_set.from is defined %}
+                from zone {{ configuration.security.nat.source.rule_set.from.zone }};
+                {% endif %}
+                {% if configuration.security.nat.source.rule_set.to is defined %}
+                to zone {{ configuration.security.nat.source.rule_set.to.zone }};
+                {% endif %}
+                {% if configuration.security.nat.source.rule_set.rule is defined %}
+                {% if configuration.security.nat.source.rule_set.rule is not mapping and configuration.security.nat.source.rule_set.rule is not string %}
+                {% for each in configuration.security.nat.source.rule_set.rule %}
+                rule {{ each.name }} {
+                    {% if each.src_nat_rule_match is defined %}
+                    match {
+                        source-address {{ each.src_nat_rule_match.source_address }};
+                        destination-address {{ each.src_nat_rule_match.destination_address }};
+                    }
+                    {% endif %}
+                    {% if each.then is defined %}
+                    then {
+                        {% if each.then.source_nat is defined %}
+                        source-nat {
+                            {% if each.then.source_nat.interface is defined %}
+                            interface;
+                            {% endif %}
+                        }
+                        {% endif %}
+                    }
+                    {% endif %}
+                }
+                {% endfor %}
+                {% else %}
+                rule {{ configuration.security.nat.source.rule_set.rule.name }} {
+                    {% if configuration.security.nat.source.rule_set.rule.src_nat_rule_match is defined %}
+                    match {
+                        source-address {{ configuration.security.nat.source.rule_set.rule.src_nat_rule_match.source_address }};
+                        destination-address {{ configuration.security.nat.source.rule_set.rule.src_nat_rule_match.destination_address }};
+                    }
+                    {% endif %}
+                    {% if configuration.security.nat.source.rule_set.rule.then is defined %}
+                    then {
+                        {% if configuration.security.nat.source.rule_set.rule.then.source_nat is defined %}
+                        source-nat {
+                            {% if configuration.security.nat.source.rule_set.rule.then.source_nat.interface is defined %}
+                            interface;
+                            {% endif %}
+                        }
+                        {% endif %}
+                    }
+                    {% endif %}
+                }
+                {% endif %}
+                {% endif %}
+            }
+            {% endif %}
+            {% endif %}
+        }
+        {% endif %}
+        {# ----------------------------------------------------------------------------------- #}
+        {# configuration.security.nat.destination                                                     #}
+        {# ----------------------------------------------------------------------------------- #}
+        {% if configuration.security.nat.destination is defined %}
+        destination {
+            {# ----------------------------------------------------------------------------------- #}
+            {# configuration.security.nat.destination.pool                                                #}
+            {# ----------------------------------------------------------------------------------- #}
+            {% if configuration.security.nat.destination.pool is defined %}
+            {% if configuration.security.nat.destination.pool is not mapping and configuration.security.nat.destination.pool is not string %}
+            {% for each in configuration.security.nat.destination.pool %}
+            pool {{ each.name }} {
+                address {{ each.address.ipaddr }} port {{ each.address.port }};
+            }
+            {% endfor %}
+            {% else %}
+            pool {{ configuration.security.nat.destination.pool.name }} {
+                address {{ configuration.security.nat.destination.pool.address.ipaddr }} port {{ configuration.security.nat.destination.pool.address.port }};
+            }
+            {% endif %}
+            {% endif %}
+            {# ----------------------------------------------------------------------------------- #}
+            {# configuration.security.nat.destination.rule_set                                            #}
+            {# ----------------------------------------------------------------------------------- #}
+            {% if configuration.security.nat.destination.rule_set is defined %}
+            {# ----------------------------------------------------------------------------------- #}
+            {# multiple configuration.security.nat.destination.rule_set                                   #}
+            {# ----------------------------------------------------------------------------------- #}
+            {% if configuration.security.nat.destination.rule_set is not mapping and configuration.security.nat.destination.rule_set is not string %}
+            {% for each in configuration.security.nat.destination.rule_set %}
+            rule-set {{ each.name }} {
+                {% if each.from is defined %}
+                from zone {{ each.from.zone }};
+                {% endif %}
+                {% for item in each.rule %}
+                rule {{ item.name }} {
+                    {% if item.dest_nat_rule_match is defined %}
+                    match {
+                        {% if item.dest_nat_rule_match.destination_address is defined %}
+                        destination-address {{ item.dest_nat_rule_match.destination_address.dst_addr }};
+                        {% endif %}
+                        {% if item.dest_nat_rule_match.destination_port is defined %}
+                        destination-port {
+                            {% if item.dest_nat_rule_match.destination_port is not mapping and item.dest_nat_rule_match.destination_port is not string %}
+                            {% for port in item.dest_nat_rule_match.destination_port %}
+                            {{ port.name }};
+                            {% endfor %}
+                            {% else %}
+                            {{ item.dest_nat_rule_match.destination_port.name }};
+                            {% endif %}
+                        }
+                        {% endif %}
+                    }
+                    {% endif %}
+                    {% if item.then is defined %}
+                    then {
+                        {% if item.then.destination_nat is defined %}
+                        destination-nat {
+                            {% if item.then.destination_nat.pool is defined %}
+                            pool {
+                                {% if item.then.destination_nat.pool.pool_name is defined %}
+                                {{ item.then.destination_nat.pool.pool_name }};
+                                {% endif %}
+                            }
+                            {% endif %}
+                        }
+                        {% endif %}
+                    }
+                    {% endif %}
+                }
+                {% endfor %}
+            }
+            {% endfor %}
+            {% else %}
+            {# ----------------------------------------------------------------------------------- #}
+            {# single configuration.security.nat.destination.rule_set                                     #}
+            {# ----------------------------------------------------------------------------------- #}
+            rule-set {{ configuration.security.nat.destination.rule_set.name }} {
+                {% if configuration.security.nat.destination.rule_set.from is defined %}
+                from zone {{ configuration.security.nat.destination.rule_set.from.zone }};
+                {% endif %}
+                {% for item in configuration.security.nat.destination.rule_set.rule %}
+                rule {{ item.name }} {
+                    {% if item.dest_nat_rule_match is defined %}
+                    match {
+                        {% if item.dest_nat_rule_match.destination_address is defined %}
+                        destination-address {{ item.dest_nat_rule_match.destination_address.dst_addr }};
+                        {% endif %}
+                        {% if item.dest_nat_rule_match.destination_port is defined %}
+                        destination-port {
+                            {% if item.dest_nat_rule_match.destination_port is not mapping and item.dest_nat_rule_match.destination_port is not string %}
+                            {% for port in item.dest_nat_rule_match.destination_port %}
+                            {{ port.name }};
+                            {% endfor %}
+                            {% else %}
+                            {{ item.dest_nat_rule_match.destination_port.name }};
+                            {% endif %}
+                        }
+                        {% endif %}
+                    }
+                    {% endif %}
+                    {% if item.then is defined %}
+                    then {
+                        {% if item.then.destination_nat is defined %}
+                        destination-nat {
+                            {% if item.then.destination_nat.pool is defined %}
+                            pool {
+                                {% if item.then.destination_nat.pool.pool_name is defined %}
+                                {{ item.then.destination_nat.pool.pool_name }};
+                                {% endif %}
+                            }
+                            {% endif %}
+                        }
+                        {% endif %}
+                    }
+                    {% endif %}
+                }
+                {% endfor %}
+            }
+            {% endif %}
+            {% endif %}
+        }
+        {% endif %}
+    }
+    {% endif %}
+    {# ----------------------------------------------------------------------------------- #}
+    {# configuration.security.forwarding_process                                                  #}
+    {# ----------------------------------------------------------------------------------- #}
+    {% if configuration.security.forwarding_process is defined %}
+    forwarding-process {
+         {% if configuration.security.forwarding_process.enhanced_services_mode is defined %}
+        enhanced-services-mode;
+        {% endif %}
+    }
+    {% endif %}
+    {# ----------------------------------------------------------------------------------- #}
+    {# configuration.security.policies                                                            #}
+    {# ----------------------------------------------------------------------------------- #}
+    {% if configuration.security.policies is defined %}
+    policies {
+        {% if configuration.security.policies.policy is defined %}
+        {# ----------------------------------------------------------------------------------- #}
+        {# multiple configuration.security.policies.policy                                            #}
+        {# ----------------------------------------------------------------------------------- #}
+        {% if configuration.security.policies.policy is not mapping and configuration.security.policies.policy is not string %}
+        {% for each in configuration.security.policies.policy %}
+        {% if each.from_zone_name and each.to_zone_name is defined %}
+        from-zone {{ each.from_zone_name }} to-zone {{ each.to_zone_name }} {
+            {% if each.policy is not mapping and each.policy is not string %}
+            {% for item in each.policy %}
+            {% if item['@inactive'] is defined %}
+            inactive: policy {{ item.name }} {
+            {% else %}
+            policy {{ item.name }} {
+            {% endif %}
+                match {
+                    {% if item.match.source_address is defined %}
+                    {% if item.match.source_address is not mapping and item.match.source_address is not string %}
+                    source-address [ {{ item.match.source_address|join(' ') }} ];
+                    {% else %}
+                    source-address {{ item.match.source_address }};
+                    {% endif %}
+                    {% endif %}
+                    {% if item.match.destination_address is defined %}
+                    destination-address {{ item.match.destination_address }};
+                    {% endif %}
+                    {% if item.match.application is defined %}
+                    {% if item.match.application is not mapping and item.match.application is not string %}
+                    application [ {{ item.match.application|join(' ') }} ];
+                    {% else %}
+                    application {{ item.match.application }};
+                    {% endif %}
+                    {% endif %}
+                }
+                {% if item.then is defined %}
+                then {
+                    {% if item.then.permit is defined %}
+                    permit;
+                    {% endif %}
+                    {% if item.then.log is defined %}
+                    log {
+                        {% if item.then.log.session_init is defined %}
+                        session-init;
+                        {% endif %}
+                        {% if item.then.log.session_close is defined %}
+                        session-close;
+                        {% endif %}
+                    }
+                    {% endif %}
+                    {% if item.then.deny is defined %}
+                    deny;
+                    {% endif %}
+                    {% if item.then.count is defined %}
+                    count;
+                    {% endif %}
+                }
+                {% endif %}
+            }
+            {% endfor %}
+            {% else %}
+            policy {{ each.policy.name }} {
+                match {
+                    {% if each.policy.match.source_address is defined %}
+                    source-address {{ each.policy.match.source_address }};
+                    {% endif %}
+                    {% if each.policy.match.destination_address is defined %}
+                    destination-address {{ each.policy.match.destination_address }};
+                    {% endif %}
+                    {% if each.policy.match.application is defined %}
+                    application {{ each.policy.match.application }};
+                    {% endif %}
+                }
+                {% if each.policy.then is defined %}
+                then {
+                    {% if each.policy.then.permit is defined %}
+                    permit;
+                    {% endif %}
+                }
+                {% endif %}
+            }
+            {% endif %}
+        }
+        {% endif %}
+        {% endfor %}
+        {% else %}
+        {# ----------------------------------------------------------------------------------- #}
+        {# single configuration.security.policies.policy                                              #}
+        {# ----------------------------------------------------------------------------------- #}
+
+        {% endif %}
+        {% endif %}
+    }
+    {% endif %}
+    {# ----------------------------------------------------------------------------------- #}
+    {# configuration.security.zones                                                               #}
+    {# ----------------------------------------------------------------------------------- #}
+    {% if configuration.security.zones is defined %}
+    zones {
+        {% for each in configuration.security.zones.security_zone %}
+        security-zone {{ each.name }} {
+            {% if each.screen is defined %}
+            screen {{ each.screen }};
+            {% endif %}
+            {# ----------------------------------------------------------------------------------- #}
+            {# configuration.security.host_inbound_traffic                                                #}
+            {# ----------------------------------------------------------------------------------- #}
+            {% if each.host_inbound_traffic is defined %}
+            host-inbound-traffic {
+                {# ----------------------------------------------------------------------------------- #}
+                {# configuration.security.system_services                                                     #}
+                {# ----------------------------------------------------------------------------------- #}
+                {% if each.host_inbound_traffic.system_services is defined %}
+                system-services {
+                    {% if each.host_inbound_traffic.system_services is not mapping and each.host_inbound_traffic.system_services is not string %}
+                    {% for item in each.host_inbound_traffic.system_services %}
+                    {{ item.name }};
+                    {% endfor %}
+                    {% else %}
+                    {{ each.host_inbound_traffic.system_services.name }};
+                    {% endif %}
+                }
+                {% endif %}
+                {# ----------------------------------------------------------------------------------- #}
+                {# configuration.security.protocols                                                           #}
+                {# ----------------------------------------------------------------------------------- #}
+                {% if each.host_inbound_traffic.protocols is defined %}
+                protocols {
+                    {% if each.host_inbound_traffic.protocols is not mapping and each.host_inbound_traffic.protocols is not string %}
+                    {% for item in each.host_inbound_traffic.protocols %}
+                    {{ item.name }};
+                    {% endfor %}
+                    {% else %}
+                    {{ each.host_inbound_traffic.protocols.name }};
+                    {% endif %}
+                }
+                {% endif %}
+            }
+            {% endif %}
+            {% if each.interfaces is defined %}
+            interfaces {
+                {% if each.interfaces is not mapping and each.interfaces is not string %}
+                {% for item in each.interfaces %}
+                {{ item.name }};
+                {% endfor %}
+                {% else %}
+                {{ each.interfaces.name }};
+                {% endif %}
+            }
+            {% endif %}
+        }
+        {% endfor %}
+    }
+    {% endif %}
+}
+{% endif %}

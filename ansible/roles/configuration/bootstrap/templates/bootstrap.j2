@@ -1,0 +1,50 @@
+system {
+    root-authentication {
+        encrypted-password "$6$eG4FXiQW$J4/a.5GZlXlrKcvJTpbaMl.qIelPqjR5lFk.POmxo5O3Vp5OdjHFFJ97PMqvABuZZOGXrdvSE6YF3f33wilgO."; ## SECRET-DATA
+    }
+    login {
+        user ansible {
+            uid 3004;
+            class super-user;
+            authentication {
+                encrypted-password "$6$f4TpXxvM$3zNPTMDOC9PTOKbrYHA.JUASXUGwPBthdTJGOuP5ClOhZmJvfl/Qjjt1bd9q2nHFVntdsV9AHJ7j7ecxdHGcV."; ## SECRET-DATA
+            }
+        }
+        user netpalm {
+            uid 3001;
+            class super-user;
+            authentication {
+                encrypted-password "$6$UNZtRTU2$tf7oY8VIKqRQ53B/qbZzPr7pFMuNOJdbiikmJTNfKaLSnjMuf8a5vDezVKwyckoMyf7JQ4QdOT6Ex1LnUhgzJ/"; ## SECRET-DATA
+            }
+        }
+    }
+    services {
+        ssh {
+            root-login allow;
+        }
+        netconf {
+            ssh;
+        }
+    }
+}
+interfaces {
+    em0 {
+        unit 0 {
+            family inet {
+                address {{ ansible_host }}/24;
+            }
+        }
+    }
+    em1 {
+        unit 0 {
+            family inet {
+                address 169.254.0.2/24;
+            }
+        }
+    }
+}
+routing-options {
+    static {
+        route 0.0.0.0/0 next-hop 192.168.43.1;
+    }
+}

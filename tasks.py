@@ -114,7 +114,10 @@ def ansible(context):
     context.run(
         f"docker run -it \
             --rm \
-            {DOCKER_IMG}:{DOCKER_TAG} ansible-playbook -vvv deploy.vsrx.yaml \
+            -v {PWD}/ansible:/home/ansible/ \
+            {DOCKER_IMG}:{DOCKER_TAG} ansible-playbook -v deploy.vsrx.yaml \
+            -e route_or_switch='route' \
+            -e wan_ipv4_address='10.1.2.2' \
             -e vcenter_hostname='{VCENTER_HOSTNAME}' \
             -e vcenter_username='{VCENTER_USERNAME}' \
             -e vcenter_password='{VCENTER_PASSWORD}' \

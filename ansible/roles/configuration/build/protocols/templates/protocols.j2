@@ -1,0 +1,632 @@
+#jinja2: lstrip_blocks: "True (or False)", trim_blocks: "True (or False)"
+{#- ---------------------------------------------------------------------------------- #}
+{# configuration.protocols                                                             #}
+{# ---------------------------------------------------------------------------------- -#}
+{% if configuration.protocols is defined %}
+protocols {
+    {# ----------------------------------------------------------------------------------- #}
+    {# mpls                                                                                #}
+    {# ---------------------------------------------------------------------------------- -#}
+    {% if configuration.protocols.mpls is defined %}
+    {% if configuration.protocols.mpls['@inactive'] is defined %}
+    inactive: mpls {
+    {% else %}
+    mpls {
+    {% endif %}
+        {% if configuration.protocols.mpls.interface is defined %}
+        {% for each in configuration.protocols.mpls.interface %}
+        {% if each.disable is defined %}
+        interface {{ each.name }} {
+            disable;
+        }
+        {% else %}
+        interface {{ each.name }};
+        {% endif %}
+        {% endfor %}
+        {% endif %}
+    }
+    {% endif %}
+    {# ----------------------------------------------------------------------------------- #}
+    {# bgp                                                                                 #}
+    {# ---------------------------------------------------------------------------------- -#}
+    {% if configuration.protocols.bgp is defined %}
+    {% if configuration.protocols.bgp['@inactive'] is defined %}
+    inactive: bgp {
+    {% else %}
+    bgp {
+    {% endif %}
+        {% if configuration.protocols.bgp.group is defined %}
+        {# ----------------------------------------------------------------------------------- #}
+        {# multiple bgp                                                                        #}
+        {# ---------------------------------------------------------------------------------- -#}
+        {% if configuration.protocols.bgp.group is not mapping and configuration.protocols.bgp.group is not string %}
+        {% for each in configuration.protocols.bgp.group %}
+        group {{ each.name }} {
+            {% if each.advertise_inactive is defined %}
+            advertise-inactive;
+            {% endif %}
+            {% if each.authentication_key is defined %}
+            authentication-key {{ each.authentication_key }};
+            {% endif %}
+            {% if each.type is defined %}
+            type {{ each.type }};
+            {% endif %}
+            {% if each.local_as is defined %}
+            local-as {{ each.local_as.as_number }};
+            {% endif %}
+            {% if each.local_address is defined %}
+            local-address {{ each.local_address }};
+            {% endif %}
+            {% if each.peer_as is defined %}
+            peer-as {{ each.peer_as }};
+            {% endif %}
+            {% if each.log_updown is defined %}
+            log-updown;
+            {% endif %}
+            {# ----------------------------------------------------------------------------------- #}
+            {# import policy                                                                       #}
+            {# ---------------------------------------------------------------------------------- -#}
+            {% if each.import is defined %}
+            {% if each.import is not mapping and each.import is not string %}
+            import [ {{ each.import|join(' ') }} ];
+            {% else %}
+            import {{ each.import }};
+            {% endif %}
+            {% endif %}
+            {# ----------------------------------------------------------------------------------- #}
+            {# family inet                                                                         #}
+            {# ---------------------------------------------------------------------------------- -#}
+            {% if each.family is defined %}
+            {% if each.family.inet is defined %}
+            family inet {
+                {% if each.family.inet.unicast is defined %}
+                unicast;
+                {% endif %}
+            }
+            {% endif %}
+            {# ----------------------------------------------------------------------------------- #}
+            {# family inet-vpn                                                                     #}
+            {# ---------------------------------------------------------------------------------- -#}
+            {% if each.family.inet_vpn is defined %}
+            family inet-vpn {
+                {% if each.family.inet_vpn.unicast is defined %}
+                unicast;
+                {% endif %}
+                {% if each.family.inet_vpn.any is defined %}
+                any;
+                {% endif %}
+            }
+            {% endif %}
+            {# ----------------------------------------------------------------------------------- #}
+            {# family evpn                                                                         #}
+            {# ---------------------------------------------------------------------------------- -#}
+            {% if each.family.evpn is defined %}
+            family evpn {
+                {% if each.family.evpn.signaling is defined %}
+                signaling;
+                {% endif %}
+            }
+            {% endif %}
+            {% endif %}
+            {# ----------------------------------------------------------------------------------- #}
+            {# export policy                                                                       #}
+            {# ---------------------------------------------------------------------------------- -#}
+            {% if each.export is defined %}
+            {% if each.export is not mapping and each.export is not string %}
+            export [ {{ each.export|join(' ') }} ];
+            {% else %}
+            export {{ each.export }};
+            {% endif %}
+            {% endif %}
+            {# ----------------------------------------------------------------------------------- #}
+            {# multipath                                                                           #}
+            {# --------------------------------------`------------------------------------------- -#}
+            {% if each.multipath is defined %}
+            multipath;
+            {% endif %}
+            {# ----------------------------------------------------------------------------------- #}
+            {# cluster id                                                                          #}
+            {# ---------------------------------------------------------------------------------- -#}
+            {% if each.cluster is defined %}
+            cluster {{ each.cluster }};
+            {% endif %}
+            {# ----------------------------------------------------------------------------------- #}
+            {# multihop                                                                            #}
+            {# ---------------------------------------------------------------------------------- -#}
+            {% if each.multihop.no_nexthop_change is defined %}
+            multihop {
+                 no-nexthop-change;
+            }
+            {% endif %}
+            {# ----------------------------------------------------------------------------------- #}
+            {# BFD                                                                                 #}
+            {# ---------------------------------------------------------------------------------- -#}
+            {% if each.bfd_liveness_detection is defined %}
+            bfd-liveness-detection {
+                {% if each.bfd_liveness_detection.minimum_interval is defined %}
+                minimum-interval {{ each.bfd_liveness_detection.minimum_interval }};
+                {% endif %}
+                {% if each.bfd_liveness_detection.multiplier is defined %}
+                multiplier {{ each.bfd_liveness_detection.multiplier }};
+                {% endif %}
+                {% if each.bfd_liveness_detection.session_mode is defined %}
+                session-mode {{ each.bfd_liveness_detection.session_mode }};
+                {% endif %}
+            }
+            {% endif %}
+            {% if each.neighbor is defined %}
+            {# ----------------------------------------------------------------------------------- #}
+            {# multiple bgp peer                                                                   #}
+            {# ---------------------------------------------------------------------------------- -#}
+            {% if each.neighbor is not mapping and each.neighbor is not string %}
+            {% for router in each.neighbor %}
+            neighbor {{ router.name }} {
+                {% if router.description is defined %}
+                description "{{ router.description }}";
+                {% endif %}
+                {% if router.local_address is defined %}
+                local-address {{ router.local_address }};
+                {% endif %}
+                {% if router.peer_as is defined %}
+                peer-as {{ router.peer_as }};
+                {% endif %}
+            }
+            {% endfor %}
+            {# ----------------------------------------------------------------------------------- #}
+            {# single bgp peer                                                                     #}
+            {# ---------------------------------------------------------------------------------- -#}
+            {% else %}
+            {% if each.neighbor|length > 1 %}
+            neighbor {{ each.neighbor.name }} {
+                {% if each.neighbor.description is defined %}
+                description "{{ each.neighbor.description }}";
+                {% endif %}
+                {% if each.neighbor.local_address is defined %}
+                local-address {{ each.neighbor.local_address }};
+                {% endif %}
+                {% if each.neighbor.peer_as is defined %}
+                peer-as {{ each.neighbor.peer_as }};
+                {% endif %}
+            }
+            {% else %}
+            neighbor {{ each.neighbor.name }};
+            {% endif %}
+            {% endif %}
+            {% endif %}
+            {% if each.vpn_apply_export is defined %}
+            vpn-apply-export;
+            {% endif %}
+        }
+        {% endfor %}
+        {# ----------------------------------------------------------------------------------- #}
+        {# single bgp                                                                          #}
+        {# ---------------------------------------------------------------------------------- -#}
+        {% elif configuration.protocols.bgp.group is iterable and configuration.protocols.bgp.group is not string %}
+        group {{ configuration.protocols.bgp.group.name }} {
+            {% if configuration.protocols.bgp.group.type is defined %}
+            type {{ configuration.protocols.bgp.group.type }};
+            {% endif %}
+            {% if configuration.protocols.bgp.group.local_address is defined %}
+            local-address {{ configuration.protocols.bgp.group.local_address }};
+            {% endif %}
+            {% if configuration.protocols.bgp.group.peer_as is defined %}
+            peer-as {{ configuration.protocols.bgp.group.peer_as }};
+            {% endif %}
+            {% if configuration.protocols.bgp.group.log_updown is defined %}
+            log-updown;
+            {% endif %}
+            {% if configuration.protocols.bgp.group.family is defined %}
+            {% if configuration.protocols.bgp.group.family.inet is defined %}
+            family inet {
+                {% if configuration.protocols.bgp.group.family.inet.unicast is defined %}
+                unicast;
+                {% endif %}
+            }
+            {% endif %}
+            {# ----------------------------------------------------------------------------------- #}
+            {# family inet-vpn                                                                     #}
+            {# ---------------------------------------------------------------------------------- -#}
+            {% if configuration.protocols.bgp.group.family.inet_vpn is defined %}
+            family inet-vpn {
+                {% if configuration.protocols.bgp.group.family.inet_vpn.unicast is defined %}
+                unicast;
+                {% endif %}
+                {% if configuration.protocols.bgp.group.family.inet_vpn.any is defined %}
+                any;
+                {% endif %}
+            }
+            {% endif %}
+            {% if configuration.protocols.bgp.group.family.evpn is defined %}
+            family evpn {
+                {% if configuration.protocols.bgp.group.family.evpn.signaling is defined %}
+                signaling;
+                {% endif %}
+            }
+            {% endif %}
+            {% if configuration.protocols.bgp.group.multipath is defined %}
+            multipath;
+            {% endif %}
+            {% if configuration.protocols.bgp.group.bfd_liveness_detection is defined %}
+            bfd-liveness-detection {
+                {% if configuration.protocols.bgp.group.bfd_liveness_detection.minimum_interval is defined %}
+                minimum-interval {{ configuration.protocols.bgp.group.bfd_liveness_detection.minimum_interval }};
+                {% endif %}
+                {% if configuration.protocols.bgp.group.bfd_liveness_detection.multiplier is defined %}
+                multiplier {{ configuration.protocols.bgp.group.bfd_liveness_detection.multiplier }};
+                {% endif %}
+                {% if configuration.protocols.bgp.group.bfd_liveness_detection.session_mode is defined %}
+                session-mode {{ configuration.protocols.bgp.group.bfd_liveness_detection.session_mode }};
+                {% endif %}
+            }
+            {% endif %}
+            {% endif %}
+            {% if configuration.protocols.bgp.group.neighbor is defined %}
+            {# if there is a single neighbor #}
+            {% if configuration.protocols.bgp.group.neighbor is mapping and configuration.protocols.bgp.group.neighbor is not string %}
+            neighbor {{ configuration.protocols.bgp.group.neighbor.name }} {
+                {% if configuration.protocols.bgp.group.neighbor.description is defined %}
+                description "{{ configuration.protocols.bgp.group.neighbor.description }}";
+                {% endif %}
+            }
+            {% elif configuration.protocols.bgp.group.neighbor is iterable and configuration.protocols.bgp.group.neighbor is not mapping %}
+            {# if there are multiple neighbors #}
+            {% for router in configuration.protocols.bgp.group.neighbor %}
+            neighbor {{ router.name }} {
+                {% if router.description is defined %}
+                description "{{ router.description }}";
+                {% endif %}
+            }
+            {% endfor %}
+            {% endif %}
+            {% endif %}
+        }
+        {% endif %}
+        {% if configuration.protocols.bgp.group.vpn_apply_export is defined %}
+        vpn-apply-export;
+        {% endif %}
+        {% endif %}
+    }
+    {% endif %}
+    {# ----------------------------------------------------------------------------------- #}
+    {# isis                                                                                #}
+    {# ---------------------------------------------------------------------------------- -#}
+    {% if configuration.protocols.isis is defined %}
+    isis {
+        {% if configuration.protocols.isis.apply_groups is defined %}
+        apply-groups {{ configuration.protocols.isis.apply_groups }};
+        {% endif %}
+        {# ----------------------------------------------------------------------------------- #}
+        {# export policy                                                                       #}
+        {# ---------------------------------------------------------------------------------- -#}
+        {% if configuration.protocols.isis.export is defined %}
+        {% if configuration.protocols.isis.export is not mapping and configuration.protocols.isis.export is not string %}
+        export [ {{ configuration.protocols.isis.export|join(' ') }} ];
+        {% else %}
+        export {{ configuration.protocols.isis.export }};
+        {% endif %}
+        {% endif %}
+        {# ----------------------------------------------------------------------------------- #}
+        {# interfaces                                                                          #}
+        {# ---------------------------------------------------------------------------------- -#}
+        {% for iface in configuration.protocols.isis.interface %}
+        {% if iface|length > 1 %}
+        interface {{ iface.name }} {
+            {% if iface.hello_padding_type is defined %}
+            hello-padding disable;
+            {% endif %}
+            {% if iface.point_to_point is defined %}
+            point-to-point;
+            {% endif %}
+            {% if iface.passive is defined %}
+            passive;
+            {% endif %}
+            {% if iface.disable is defined %}
+            disable;
+            {% endif %}
+        }
+        {% else %}
+        interface {{ iface.name }};
+        {% endif %}
+        {% endfor %}
+        {% if configuration.protocols.isis.level is defined %}
+        {% if configuration.protocols.isis.level is not mapping and configuration.protocols.isis.level is not string %}
+        {% for level in configuration.protocols.isis.level %}
+        {% if level.disable is defined %}
+        level {{ level.name }} disable;
+        {% else %}
+        level {{ level.name }} {
+            {% if level.wide_metrics_only is defined %}
+            wide-metrics-only;
+            {% endif %}
+            {% if level.prefix_export_limit is defined %}
+            prefix-export-limit {{ level.prefix_export_limit }};
+            {% endif %}
+        }
+        {% endif %}
+        {% endfor %}
+        {% else %}
+        {% if configuration.protocols.isis.level.disable is defined %}
+        level {{ configuration.protocols.isis.level.name }} disable;
+        {% else %}
+        level {{ configuration.protocols.isis.level.name }} {
+            {% if configuration.protocols.isis.level.wide_metrics_only is defined %}
+            wide-metrics-only;
+            {% endif %}
+            {% if configuration.protocols.isis.level.prefix_export_limit is defined %}
+            prefix-export-limit {{ configuration.protocols.isis.level.prefix_export_limit }};
+            {% endif %}
+        }
+        {% endif %}
+        {% endif %}
+        {% endif %}
+        {% if configuration.protocols.isis.reference_bandwidth is defined %}
+        reference-bandwidth {{ configuration.protocols.isis.reference_bandwidth }};
+        {% endif %}
+        {% if configuration.protocols.isis.lsp_lifetime is defined %}
+        lsp-lifetime {{ configuration.protocols.isis.lsp_lifetime }};
+        {% endif %}
+    }
+    {% endif %}
+    {# ----------------------------------------------------------------------------------- #}
+    {# ldp                                                                                 #}
+    {# ---------------------------------------------------------------------------------- -#}
+    {% if configuration.protocols.ldp is defined %}
+    ldp {
+        {% if configuration.protocols.ldp.track_igp_metric is defined %}
+        track-igp-metric;
+        {% endif %}
+        {% if configuration.protocols.ldp.interface is defined %}
+        {% if configuration.protocols.ldp.interface is not mapping and configuration.protocols.ldp.interface is not string %}
+        {% for each in configuration.protocols.ldp.interface %}
+        {% if each|length > 1 %}
+        interface {{ each.name }} {
+            {% if each.disable is defined %}
+            disable;
+            {% endif %}
+        }
+        {% else %}
+        interface {{ each.name }};
+        {% endif %}
+        {% endfor %}
+        {% else %}
+        interface {{ configuration.protocols.ldp.interface.name }};
+        {% endif %}
+        {% endif %}
+    }
+    {% endif %}
+    {# ----------------------------------------------------------------------------------- #}
+    {# evpn                                                                                #}
+    {# ---------------------------------------------------------------------------------- -#}
+    {% if configuration.protocols.evpn is defined %}
+    {% if configuration.protocols.evpn['@inactive'] is defined %}
+    inactive: evpn {
+    {% else %}
+    evpn {
+    {% endif %}
+        {% if configuration.protocols.evpn.default_gateway is defined %}
+        default-gateway {{ configuration.protocols.evpn.default_gateway }};
+        {% endif %}
+        {% if configuration.protocols.evpn.encapsulation is defined %}
+        encapsulation {{ configuration.protocols.evpn.encapsulation }};
+        {% endif %}
+        {% if configuration.protocols.evpn.extended_vni_list is defined %}
+        {# ----------------------------------------------------------------------------------- #}
+        {# check to see if the extended vni list is a list                                     #}
+        {# ---------------------------------------------------------------------------------- -#}
+        {% if configuration.protocols.evpn.extended_vni_list is not mapping and configuration.protocols.evpn.extended_vni_list is not string %}
+        {% for each in configuration.protocols.evpn.extended_vni_list %}
+        extended-vni-list {{ each }};
+        {% endfor %}
+        {# ----------------------------------------------------------------------------------- #}
+        {# match everything that is not a list                                                 #}
+        {# ---------------------------------------------------------------------------------- -#}
+        {% else %}
+        extended-vni-list {{ configuration.protocols.evpn.extended_vni_list }};
+        {% endif %}
+        {% endif %}
+    }
+    {% endif %}
+    {# ----------------------------------------------------------------------------------- #}
+    {# l2-learning                                                                         #}
+    {# ---------------------------------------------------------------------------------- -#}
+    {% if configuration.protocols.l2_learning is defined %}
+    l2-learning {
+        {% if configuration.protocols.l2_learning.global_mac_table_aging_time is defined %}
+        global-mac-table-aging-time {{ configuration.protocols.l2_learning.global_mac_table_aging_time }};
+        {% endif %}
+    }
+    {% endif %}
+    {# ----------------------------------------------------------------------------------- #}
+    {# lldp                                                                                #}
+    {# ---------------------------------------------------------------------------------- -#}
+    {% if configuration.protocols.lldp is defined %}
+    lldp {
+        {# ----------------------------------------------------------------------------------- #}
+        {# port-id-subtype                                                                     #}
+        {# ---------------------------------------------------------------------------------- -#}
+        {% if configuration.protocols.lldp.port_id_subtype is defined %}
+        port-id-subtype {{ configuration.protocols.lldp.port_id_subtype }};
+        {% endif %}
+        {# ----------------------------------------------------------------------------------- #}
+        {# port-id-subtype                                                                     #}
+        {# ---------------------------------------------------------------------------------- -#}
+        {% if configuration.protocols.lldp.port_description_type is defined %}
+        port-description-type interface-alias;
+        {% endif %}
+        {% if configuration.protocols.lldp.interface is defined %}
+        {# ----------------------------------------------------------------------------------- #}
+        {# multiple lldp interfaces                                                            #}
+        {# ---------------------------------------------------------------------------------- -#}
+        {% if configuration.protocols.lldp.interface is not mapping and configuration.protocols.lldp.interface is not string %}
+        {% for each in configuration.protocols.lldp.interface %}
+        {% if each.disable is defined %}
+        interface {{ each.name }} {
+            disable;
+        }
+        {% else %}
+        interface {{ each.name }};
+        {% endif %}
+        {% endfor %}
+        {# ----------------------------------------------------------------------------------- #}
+        {# single lldp interfaces                                                              #}
+        {# ---------------------------------------------------------------------------------- -#}
+        {% else %}
+        {% if configuration.protocols.lldp.interface.disable is defined %}
+        interface {{ configuration.protocols.lldp.interface.name }} {
+            disable;
+        }
+        {% else %}
+        interface {{ configuration.protocols.lldp.interface.name }};
+        {% endif %}
+        {% endif %}
+        {% endif %}
+    }
+    {% endif %}
+    {# ----------------------------------------------------------------------------------- #}
+    {# lldp-med                                                                            #}
+    {# ---------------------------------------------------------------------------------- -#}
+    {% if configuration.protocols.lldp_med is defined %}
+    lldp-med {
+        {% if configuration.protocols.lldp_med.port_description_type is defined %}
+        port-description-type interface-alias;
+        {% endif %}
+        {% if configuration.protocols.lldp_med.interface is defined %}
+        {# multiple lldp_med interfaces #}
+        {% if configuration.protocols.lldp_med.interface is not mapping and configuration.protocols.lldp_med.interface is not string %}
+        {% for each in configuration.protocols.lldp_med.interface %}
+        {% if each.disable is defined %}
+        interface {{ each.name }} {
+            disable;
+        }
+        {% else %}
+        interface {{ each.name }};
+        {% endif %}
+        {% endfor %}
+        {# SINGLE INSTANCE #}
+        {% else %}
+        {% if configuration.protocols.lldp_med.interface.disable is defined %}
+        interface {{ configuration.protocols.lldp_med.interface.name }} {
+            disable;
+        }
+        {% else %}
+        interface {{ configuration.protocols.lldp_med.interface.name }};
+        {% endif %}
+        {% endif %}
+        {% endif %}
+    }
+    {% endif %}
+    {# ----------------------------------------------------------------------------------- #}
+    {# igmp-snooping                                                                       #}
+    {# ---------------------------------------------------------------------------------- -#}
+    {% if configuration.protocols.igmp_snooping is defined %}
+    igmp-snooping {
+        {% if configuration.protocols.igmp_snooping.vlan is defined %}
+        {% if configuration.protocols.igmp_snooping.vlan is not mapping and configuration.protocols.igmp_snooping.vlan is not string %}
+        {% for each in configuration.protocols.igmp_snooping.vlan %}
+        vlan {{ each.name }};
+        {% endfor %}
+        {% else %}
+        vlan {{ configuration.protocols.igmp_snooping.vlan.name }};
+        {% endif %}
+        {% endif %}
+    }
+    {% endif %}
+    {# ----------------------------------------------------------------------------------- #}
+    {# mstp                                                                                #}
+    {# ---------------------------------------------------------------------------------- -#}
+    {% if configuration.protocols.mstp is defined %}
+    mstp {
+        {% if configuration.protocols.mstp.configuration_name is defined %}
+        configuration-name {{ configuration.protocols.mstp.configuration_name }};
+        {% endif %}
+        {% if configuration.protocols.mstp.bridge_priority is defined %}
+        bridge-priority {{ configuration.protocols.mstp.bridge_priority }};
+        {% endif %}
+        {# Multiple interfaces #}
+        {% if configuration.protocols.mstp.interface is not mapping and configuration.protocols.mstp.interface is not string %}
+        {% for each in configuration.protocols.mstp.interface %}
+        interface {{ each.name }} {
+            {% if each.mode is defined %}
+            mode {{ each.mode }};
+            {% endif %}
+            {% if each.edge is defined %}
+            edge;
+            {% endif %}
+        }
+        {% endfor %}
+        {# single interface #}
+        {% else %}
+        interface {{ configuration.protocols.mstp.interface.name }} {
+            {% if configuration.protocols.mstp.interface.mode is defined %}
+            mode {{ configuration.protocols.mstp.interface.mode }};
+            {% endif %}
+            {% if configuration.protocols.mstp.interface.edge is defined %}
+            edge;
+            {% endif %}
+        }
+        {% endif %}
+        {% if configuration.protocols.mstp.msti is defined %}
+        msti {{ configuration.protocols.mstp.msti.name }} {
+            {% if configuration.protocols.mstp.msti.bridge_priority is defined %}
+            bridge-priority {{ configuration.protocols.mstp.msti.bridge_priority }};
+            {% endif %}
+            {% if configuration.protocols.mstp.msti.vlan is defined %}
+            vlan {{ configuration.protocols.mstp.msti.vlan }};
+            {% endif %}
+            {% if configuration.protocols.mstp.msti.interface is defined %}
+            {# multiple interface #}
+            {% if configuration.protocols.mstp.msti.interface is not mapping and configuration.protocols.mstp.msti.interface is not string %}
+            {% for each in configuration.protocols.mstp.msti.interface %}
+            interface {{ each.name }} {
+                {% if each.cost is defined %}
+                cost {{ each.cost }};
+                {% endif %}
+            }
+            {% endfor %}
+            {# single interface #}
+            {% else %}
+            interface {{ configuration.protocols.mstp.msti.interface.name }} {
+                {% if configuration.protocols.mstp.msti.interface.cost is defined %}
+                cost {{ configuration.protocols.mstp.msti.interface.cost }};
+                {% endif %}
+            }
+            {% endif %}
+            {% endif %}
+        }
+        {% endif %}
+    }
+    {% endif %}
+    {# ----------------------------------------------------------------------------------- #}
+    {# ospf                                                                                #}
+    {# ---------------------------------------------------------------------------------- -#}
+    {% if configuration.protocols.ospf is defined %}
+    ospf {
+        {% if configuration.protocols.ospf.export is defined %}
+        {% if configuration.protocols.ospf.export is not mapping and configuration.protocols.ospf.export is not string %}
+        export {{ configuration.protocols.ospf.export[0] }};
+        {% else %}
+        export {{ configuration.protocols.ospf.export[0] }};
+        {% endif %}
+        {% endif %}
+        {% for each in configuration.protocols.ospf.area %}
+        area {{ each.name }} {
+            {# Multiple interfaces #}
+            {% for iface in each.interface %}
+            {% if iface.interface_type is defined %}
+            interface {{ iface.name }} {
+                interface-type {{ iface.interface_type }};
+            }
+            {% elif iface.passive is defined %}
+            interface {{ iface.name }} {
+                passive;
+            }
+            {% else %}
+            interface {{ iface.name }};
+            {% endif %}
+            {% endfor %}
+        }
+        {% endfor %}
+    }
+    {% endif %}
+}
+{% endif %}

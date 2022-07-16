@@ -1,0 +1,6 @@
+---
+dependencies:
+  - role: juniper.junos
+    skip_downloads: true
+    tags:
+      - junos

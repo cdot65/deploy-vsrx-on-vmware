@@ -1,0 +1,80 @@
+#jinja2: lstrip_blocks: "True (or False)", trim_blocks: "True (or False)"
+{#- ---------------------------------------------------------------------------------- #}
+{# configuration.vlans                                                                               #}
+{# ---------------------------------------------------------------------------------- -#}
+{% if configuration.vlans is defined %}
+vlans {
+    {% if configuration.vlans.vlan is not mapping and configuration.vlans.vlan is not string %}
+    {% for each in configuration.vlans.vlan %}
+    {% if each.name is defined %}
+    {{ each.name }} {
+        {% if each.description is defined %}
+        description "{{ each.description }}";
+        {% endif %}
+        {% if each.vlan_id is defined %}
+        vlan-id {{ each.vlan_id }};
+        {% endif %}
+        {% if each.l3_interface is defined %}
+        l3-interface {{ each.l3_interface }};
+        {% endif %}
+        {% if each.vxlan is defined %}
+        vxlan {
+            {% if each.vxlan.ingress_node_replication is defined %}
+            ingress-node-replication;
+            {% endif %}
+            vni {{ each.vxlan.vni }};
+        }
+        {% endif %}
+        {% if each.forwarding_options is defined %}
+        forwarding-options {
+            {% if each.forwarding_options.dhcp_security is defined %}
+            {% if each.forwarding_options.dhcp_security.group is defined %}
+            dhcp-security {
+                group {{ each.forwarding_options.dhcp_security.group.name }} {
+                    {% if each.forwarding_options.dhcp_security.group.overrides is defined %}
+                    overrides {
+                        {% if each.forwarding_options.dhcp_security.group.overrides.trusted is defined %}
+                        trusted;
+                        {% endif %}
+                    }
+                    {% endif %}
+                    {% if each.forwarding_options.dhcp_security.group.interface is defined %}
+                    {% if each.forwarding_options.dhcp_security.group.interface is not mapping and each.forwarding_options.dhcp_security.group.interface is not string %}
+                    {% for iface in each.forwarding_options.dhcp_security.group.interface %}
+                    interface {{ iface.name }};
+                    {% endfor %}
+                    {% else %}
+                    interface {{ each.forwarding_options.dhcp_security.group.interface.name }};
+                    {% endif %}
+                    {% endif %}
+                }
+            }
+            {% else %}
+            dhcp-security;
+            {% endif %}
+            {% endif %}
+        }
+        {% endif %}
+    }
+    {% endif %}
+    {% endfor %}
+    {% else %}
+    {{ configuration.vlans.vlan.name }} {
+        {% if configuration.vlans.vlan.description is defined %}
+        description "{{ configuration.vlans.vlan.description }}";
+        {% endif %}
+        {% if configuration.vlans.vlan.vlan_id is defined %}
+        vlan-id {{ configuration.vlans.vlan.vlan_id }};
+        {% endif %}
+        {% if configuration.vlans.vlan.l3_interface is defined %}
+        l3-interface {{ configuration.vlans.vlan.l3_interface }};
+        {% endif %}
+        {% if configuration.vlans.vlan.vxlan is defined %}
+        vxlan {
+            vni {{ configuration.vlans.vlan.vxlan.vni }};
+        }
+        {% endif %}
+    }
+    {% endif %}
+}
+{% endif %}
