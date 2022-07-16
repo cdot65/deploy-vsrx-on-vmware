@@ -6,25 +6,43 @@ interfaces {
     ge-0/0/0 {
         description "WAN interface";
         unit 0 {
-{#- ---------------------------------------------------------------------------------- #}
-{# L2 mode                                                                             #}
-{# ---------------------------------------------------------------------------------- -#}
             {% if route_or_switch == "switch" %}
             family ethernet-switching {
                 interface-mode access;
                 vlan {
-                    members {{ vlan_untrust }};
+                    members untrust;
                 }
             }
-            {% endif %}
-{#- ---------------------------------------------------------------------------------- #}
-{# L3 mode                                                                             #}
-{# ---------------------------------------------------------------------------------- -#}
-            {% if route_or_switch == "route" %}
+            {% else %}
             family inet {
                 address {{ wan_ipv4_address }}/30;
             }
             {% endif %}
+        }
+    }
+    ge-0/0/1 {
+        description "DMZ interface";
+        unit 0 {
+            {% if route_or_switch == "switch" %}
+            family ethernet-switching {
+                interface-mode access;
+                vlan {
+                    members trust;
+                }
+            }
+            {% else %}
+            family inet {
+                address {{ dmz_ipv4_address }}/24;
+            }
+            {% endif %}
+        }
+    }
+    fxp0 {
+        description "Management interface";
+        unit 0 {
+            family inet {
+                address {{ management_ip }}/24;
+            }
         }
     }
 }

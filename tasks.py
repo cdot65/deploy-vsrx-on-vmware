@@ -118,6 +118,63 @@ def ansible(context):
             {DOCKER_IMG}:{DOCKER_TAG} ansible-playbook -v deploy.vsrx.yaml \
             -e route_or_switch='route' \
             -e wan_ipv4_address='10.1.2.2' \
+            -e dmz_ipv4_address='192.168.2.1' \
+            -e management_ip='192.168.105.201' \
+            -e bgp_peer_ip='10.1.2.1' \
+            -e bgp_export='direct' \
+            -e bgp_import='default' \
+            -e vcenter_hostname='{VCENTER_HOSTNAME}' \
+            -e vcenter_username='{VCENTER_USERNAME}' \
+            -e vcenter_password='{VCENTER_PASSWORD}' \
+            -e datacenter='{VCENTER_DATACENTER}' \
+            -e folder='{VCENTER_FOLDER}' \
+            -e template='{VCENTER_TEMPLATE}' \
+            -e esxi_host='{VCENTER_ESXI_HOST}' \
+            -e vm_name='{VM_NAME}'",
+        pty=True,
+    )
+
+
+@task
+def route(context):
+    # Execute Ansible playbook from within the container
+    context.run(
+        f"docker run -it \
+            --rm \
+            -v {PWD}/ansible:/home/ansible/ \
+            {DOCKER_IMG}:{DOCKER_TAG} ansible-playbook -v deploy.vsrx.yaml \
+            -e route_or_switch='route' \
+            -e trust_source_nat='true' \
+            -e wan_ipv4_address='10.1.2.2' \
+            -e dmz_ipv4_address='192.168.2.1' \
+            -e management_ip='192.168.105.201' \
+            -e bgp_peer_ip='10.1.2.1' \
+            -e bgp_export='direct' \
+            -e bgp_import='default' \
+            -e vcenter_hostname='{VCENTER_HOSTNAME}' \
+            -e vcenter_username='{VCENTER_USERNAME}' \
+            -e vcenter_password='{VCENTER_PASSWORD}' \
+            -e datacenter='{VCENTER_DATACENTER}' \
+            -e folder='{VCENTER_FOLDER}' \
+            -e template='{VCENTER_TEMPLATE}' \
+            -e esxi_host='{VCENTER_ESXI_HOST}' \
+            -e vm_name='{VM_NAME}'",
+        pty=True,
+    )
+
+
+@task
+def switch(context):
+    # Execute Ansible playbook from within the container
+    context.run(
+        f"docker run -it \
+            --rm \
+            -v {PWD}/ansible:/home/ansible/ \
+            {DOCKER_IMG}:{DOCKER_TAG} ansible-playbook -v deploy.vsrx.yaml \
+            -e route_or_switch='switch' \
+            -e vlan_untrust='101' \
+            -e vlan_trust='4001' \
+            -e management_ip='192.168.105.201' \
             -e vcenter_hostname='{VCENTER_HOSTNAME}' \
             -e vcenter_username='{VCENTER_USERNAME}' \
             -e vcenter_password='{VCENTER_PASSWORD}' \

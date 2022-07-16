@@ -22,29 +22,13 @@
         loop:
           - 'configuration/build/system'
           - 'configuration/build/interfaces'
-          # - 'configuration/build/system'
-          # - 'configuration/build/system'
-          # - 'configuration/build/system'
-        loop_control:
-          loop_var: configuration_role
-
-      - name: Layer 2 mode
-        ansible.builtin.include_role:
-          name: '{{ configuration_role }}'
-        loop:
+          - 'configuration/build/protocols'
+          - 'configuration/build/policy_options'
+          - 'configuration/build/routing_options'
+          - 'configuration/build/security'
           - 'configuration/build/vlans'
         loop_control:
           loop_var: configuration_role
-        when: route_or_switch == "switch"
-
-      - name: Layer 3 mode
-        ansible.builtin.include_role:
-          name: '{{ configuration_role }}'
-        loop:
-          - 'configuration/build/protocols'
-        loop_control:
-          loop_var: configuration_role
-        when: route_or_switch == "route"
 
       - name: Assemble our vSRX parts
         ansible.builtin.include_role:
