@@ -2,23 +2,8 @@
 {#- ---------------------------------------------------------------------------------- #}
 {# Protocols                                                                           #}
 {# ---------------------------------------------------------------------------------- -#}
+{% if route_or_switch == "route" %}
 protocols {
-    {% if route_or_switch == "switch" %}
-    mstp {
-        configuration-name redtail;
-        bridge-priority 32k;
-        interface ge-0/0/0 {
-            mode point-to-point;
-        }
-        interface ge-0/0/1 {
-            edge;
-        }
-        msti 1 {
-            bridge-priority 60k;
-            vlan 1-4094;
-        }
-    }
-    {% else %}
     bgp {
         group datacenter {
             type external;
@@ -35,5 +20,5 @@ protocols {
             }
         }
     }
-    {% endif %}
 }
+{% endif %}

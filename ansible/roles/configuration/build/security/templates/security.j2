@@ -31,8 +31,8 @@ security {
         from-zone trust to-zone untrust {
             policy permit_dmz_untrust {
                 match {
-                    source-address any-ipv4;
-                    destination-address any-ipv4;
+                    source-address any;
+                    destination-address any;
                     application any;
                 }
                 then {
@@ -56,6 +56,7 @@ security {
             }
         }
         security-zone untrust {
+            {% if route_or_switch == "route" %}
             host-inbound-traffic {
                 system-services {
                     ping;
@@ -64,6 +65,7 @@ security {
                     bgp;
                 }
             }
+            {% endif %}
             interfaces {
                 ge-0/0/0.0;
             }

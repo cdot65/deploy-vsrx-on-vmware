@@ -10,7 +10,7 @@ interfaces {
             family ethernet-switching {
                 interface-mode access;
                 vlan {
-                    members untrust;
+                    members trust;
                 }
             }
             {% else %}
@@ -39,10 +39,12 @@ interfaces {
     }
     fxp0 {
         description "Management interface";
+        {% if management_ip != "undefined" %}
         unit 0 {
             family inet {
                 address {{ management_ip }}/24;
             }
         }
+        {% endif %}
     }
 }

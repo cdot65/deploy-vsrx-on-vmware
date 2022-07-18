@@ -5,12 +5,8 @@
 {% if route_or_switch == "switch" %}
 vlans {
     trust {
-        description "DMZ clean vlan";
+        description "Transparent Bridged VLAN";
         vlan-id {{ vlan_trust }};
-    }
-    untrust {
-        description "WAN dirty vlan";
-        vlan-id {{ vlan_untrust }};
     }
 }
 {% endif %}

@@ -2,15 +2,9 @@
 {#- ---------------------------------------------------------------------------------- #}
 {# Routing Options                                                                     #}
 {# ---------------------------------------------------------------------------------- -#}
+{% if route_or_switch == "route" %}
 routing-options {
-    static {
-        route 0.0.0.0/0 {
-            next-hop 192.168.105.1;
-            no-readvertise;
-        }
-    }
-    {% if route_or_switch == "route" %}
     router-id {{ wan_ipv4_address }};
     autonomous-system 65001;
-    {% endif %}
 }
+{% endif %}

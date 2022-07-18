@@ -26,7 +26,7 @@ VCENTER_FOLDER = os.environ.get("VCENTER_FOLDER", "/Templates")
 VCENTER_TEMPLATE = os.environ.get("VCENTER_TEMPLATE", "vsrx-template")
 VCENTER_ESXI_HOST = os.environ.get("VCENTER_ESXI_HOST", "dell-r820.dmz.home")
 
-VM_NAME = "ansible-test"
+VM_NAME = "vsrx-01"
 
 
 # ---------------------------------------------------------------------------
@@ -172,9 +172,10 @@ def switch(context):
             -v {PWD}/ansible:/home/ansible/ \
             {DOCKER_IMG}:{DOCKER_TAG} ansible-playbook -v deploy.vsrx.yaml \
             -e route_or_switch='switch' \
-            -e vlan_untrust='101' \
+            -e vlan_untrust='4000' \
             -e vlan_trust='4001' \
-            -e management_ip='192.168.105.201' \
+            -e management_ip='undefined' \
+            -e trust_source_nat='false' \
             -e vcenter_hostname='{VCENTER_HOSTNAME}' \
             -e vcenter_username='{VCENTER_USERNAME}' \
             -e vcenter_password='{VCENTER_PASSWORD}' \
